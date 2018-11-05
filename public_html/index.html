@@ -9,13 +9,12 @@ and open the template in the editor.
         <title>TODO supply a title</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="css/style.css"/>
     </head>
     <body id="all">
-        <div>TODO write content</div>
     </body>
     <script>
-        var tauler = new Array(30);
-                console.log(tauler[0]);
+        tauler = new Array(30);
 
         tauler[29] = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         tauler[28] = [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0];
@@ -47,22 +46,91 @@ and open the template in the editor.
         tauler[2] = [0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0];
         tauler[1] = [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0];
         tauler[0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        
-        document.write("<span style='background-color: yellow;'>" + tauler[9][12] + ", </span>");
-        document.write("<br><br>");
-        for (var i = 0; i < tauler[i].length; i++) {
-            for (var j = 0; j < tauler.length; j++) {
-                if (i === 5 && j === 5) {
-                    document.write("<span style='background-color: yellow;'>" + tauler[j][i] + ", </span>");
-                } else if (tauler[j][i] === 0) {
-                    document.write("<span style='background-color: red;'>" + tauler[j][i] + ", </span>");
-                } else {
-                    document.write(tauler[j][i] + ", ");
-                }
-            }
-            document.write("<br>");
+        //Llegenda
+        document.write("<span style='background-color: #93b9ff;'>i = x</span><br>");
+        document.write("<span style='background-color: #ff7644;'>j = y</span>");
+        document.write("<br>");
+        //----
+        //Mostra el tauler
+        mostrarTauler();
+        //Inicialitza variable jugador + 3 fantasmes
+        inicialitzarCaracters();
+
+        function inicialitzarCaracters() {
+            jugador = new Array();
+            jugador["x"] = 0;
+            jugador["y"] = 0;
+            jugador["direccio"] = 0;
+            jugador["direccioUsuari"] = 0;
+
+            fantasma1 = new Array();
+            fantasma1["x"] = 0;
+            fantasma1["y"] = 0;
+            fantasma1["direccio"] = 0;
+
+            fantasma2 = new Array();
+            fantasma2["x"] = 0;
+            fantasma2["y"] = 0;
+            fantasma2["direccio"] = 0;
+
+            fantasma3 = new Array();
+            fantasma3["x"] = 0;
+            fantasma3["y"] = 0;
+            fantasma3["direccio"] = 0;
+
+
+            /*Això és inici del punt 2 (funciona)*/
+            do {
+                jugador["x"] = generarNumeroAleatori(0, 29);
+                jugador["y"] = generarNumeroAleatori(0, 29);
+            } while (esParet(jugador["x"], jugador["y"]));
+
         }
-        console.log(tauler);
+
+        function esParet(x, y) {
+            //aquesta funcio ens diu si es paret o no la x i la y que li pasem per parametre
+            if (tauler[y][x] === 0) { //primer comença a comprobar la y perque el tauler el tinc de manera que la posició 0,0 es la part inferior esquerra
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function generarNumeroAleatori(min, max) { //genera un numero aleatori
+            return Math.round(Math.random() * ((max) - min) + min);
+        }
+
+        function mostrarTauler() {
+            //aquesta funcio ens mostra el tauler
+            document.write("<table>"); //ho mostrem amb una taula
+            document.write("<tr>");
+            for (var mostrarX = -1; mostrarX < tauler.length; mostrarX++) {
+                document.write("<td>");
+                document.write("<span style='background-color: #93b9ff;'>" + mostrarX + "</span>"); //pintem x
+                document.write("</td>");
+
+            }
+            document.write("</tr>");
+
+
+            for (var i = 0; i < tauler.length; i++) {
+                document.write("<tr>");
+
+                    document.write("<td>");
+                        document.write("<span style='background-color: #ff7644;'>" + i + "</span>"); //pintem y
+                    document.write("</td>");
+                for (var j = 0; j < tauler.length; j++) {
+                    document.write("<td>");
+                    if (tauler[j][i] === 0) {
+                        //diferenciem els limits
+                        document.write("<span style='background-color: #474747;'>" + tauler[j][i] + "</span>");
+                    }
+                    document.write("</td>");
+                }
+                document.write("</tr>");
+            }
+            document.write("</table>");
+        }
 
     </script>
 </html>
