@@ -47,21 +47,98 @@ and open the template in the editor.
         tauler[1] = [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0];
         tauler[0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         //Llegenda
-        document.write("<span style='background-color: #93b9ff;'>i = x</span><br>");
-        document.write("<span style='background-color: #ff7644;'>j = y</span>");
+        document.write("<span style='background-color: #93b9ff;'>x = j</span><br>");
+        document.write("<span style='background-color: #ff7644;'>y = i</span>");
         document.write("<br>");
         //----
-        //Mostra el tauler
-        mostrarTauler();
         //Inicialitza variable jugador + 3 fantasmes
         inicialitzarCaracters();
+        //Assignem una direcció inicial a cada variable
+        assignarDireccioInicial(jugador);
+        assignarDireccioInicial(fantasma1);
+        assignarDireccioInicial(fantasma2);
+        assignarDireccioInicial(fantasma3);
+        //Comprovem direccions(1-Amunt, 2-Dreta, 3-Abaix, 4-Esquerra)
+        document.write("Direccions: (1-Amunt, 2-Dreta, 3-Abaix, 4-Esquerra)<br>");
+        document.write("Direccio Jugador: " + jugador["direccio"]);
+        document.write("<br>Direccio fantasma1: " + fantasma1["direccio"]);
+        document.write("<br>Direccio fantasma2: " + fantasma2["direccio"]);
+        document.write("<br>Direccio fantasma3: " + fantasma3["direccio"]);
+
+        //Mostra el tauler
+        mostrarTauler();
+        //mostra el tauler girat cap a l'esquerra perque comença a mostrar a la posicio 0,0 (part inferior esquerra)
+
+        function assignarDireccioInicial(variable) {
+            //Creem 4 variables per comptar quant espai lliure n'hi ha respecte al jugador o fantasma
+            var comptarAmunt = 0;
+            var comptarAbaix = 0;
+            var comptarEsquerra = 0;
+            var comptarDreta = 0;
+
+            if (tauler[variable["y"] + 1][variable["x"]] === 1) {//Si es pot anar amunt al menys un cop
+                var i = 1;
+                while ((tauler[variable["y"] + i][variable["x"]] !== 0) && (tauler[variable["y"] + i][variable["x"]] !== "F")) {
+                    //aquest while es el mateix per els 4 ifs (4 direccions), el que nomes canvia es la posicio de la x o y
+                    //el while va comptant quant espai n'hi ha en cada direcció, te en compte també si hi ha un fantasma deixa de comptar
+                    //en el cas del jugador no fa falta
+                    comptarAmunt = i; //cada vegada que fa el bucle actualitzem el comptador
+                    i++;
+                }
+
+            }
+            if (tauler[variable["y"] - 1][variable["x"]] === 1) {//Si al menys es pot anar cap abaix un cop
+                var i = 1;
+                while ((tauler[variable["y"] - i][variable["x"]] !== 0) && (tauler[variable["y"] - i][variable["x"]] !== "F")) {
+                    comptarAbaix = i;
+                    i++;
+                }
+            }
+            if (tauler[variable["y"]][variable["x"] - 1] === 1) { //Si al menys es pot anar cap a l'esquerra un cop
+                var i = 1;
+                while ((tauler[variable["y"]][variable["x"] - i] !== 0) && (tauler[variable["y"]][variable["x"] - i] !== "F")) {
+                    comptarEsquerra = i;
+                    i++;
+                }
+            }
+
+            if (tauler[variable["y"]][variable["x"] + 1] === 1) { //Si al menys es pot anar cap a la dreta un cop
+                var i = 1;
+                while ((tauler[variable["y"]][variable["x"] + i] !== 0) && (tauler[variable["y"]][variable["x"] + i] !== "F")) {
+                    comptarDreta = i;
+                    i++;
+                }
+            }
+
+            //Creem un array de 5 posicions (no usarem la 0), 
+            //en el cual la posicio 1 sera amunt, el 2 dreta, 3 esquerra,...
+            //esta en aquest ordre perque sigui facil identificar, (va com les agulles del rellotje, encara que realment les posicions haurien de ser 0,3,6,9... pero com ho volem fer facil i es una cosa que qui programa ho sap ho deixo així)
+
+            var comptarTotes = new Array(5);
+            comptarTotes[1] = comptarAmunt;
+            comptarTotes[2] = comptarDreta;
+            comptarTotes[3] = comptarAbaix;
+            comptarTotes[4] = comptarEsquerra;
+            var max = -1; //fem una variable per saber quin es el maxim, iniciem a -1 perque qualsevol valor sigui el maxim per minim que sigui
+            var ultimMaxim = 0; //ultim maxim emmagatzemara la ultima i de la direccio amb mes espais lliures
+            //per aixi saber quina es la direccio mes correcta per començar
+
+            for (var i = 1; i < comptarTotes.length; i++) {
+                if (comptarTotes[i] >= max) { //en el cas de que sigui un valor igual al maxim, el maxim sera l'ultim igual (es podria allargar la funcio amb un random per escollir quin dels dos, pero ho veig be aixi)
+                    max = comptarTotes[i];
+                    ultimMaxim = i;
+                }
+            }
+
+            variable["direccio"] = ultimMaxim; //finalment li diem que la direccio del fantasma o jugador es la de l'ultim Maxim
+        }
 
         function inicialitzarCaracters() {
             jugador = new Array();
-            jugador["x"] = 0;
-            jugador["y"] = 0;
-            jugador["direccio"] = 0;
-            jugador["direccioUsuari"] = 0;
+            jugador["x"] = 0; //on guardem la X
+            jugador["y"] = 0; //on guardem la Y
+            jugador["direccio"] = 0; //on guardem la seva direcció 
+            jugador["direccioUsuari"] = 0; //on guardem la direccio que es prem pel teclat
 
             fantasma1 = new Array();
             fantasma1["x"] = 0;
@@ -80,11 +157,34 @@ and open the template in the editor.
 
 
             /*Això és inici del punt 2 (funciona)*/
-            do {
-                jugador["x"] = generarNumeroAleatori(0, 29);
-                jugador["y"] = generarNumeroAleatori(0, 29);
-            } while (esParet(jugador["x"], jugador["y"]));
+            posicionaAlTauler(jugador);
+            posicionaAlTauler(fantasma1);
+            posicionaAlTauler(fantasma2);
+            posicionaAlTauler(fantasma3);
 
+        }
+
+        function posicionaAlTauler(variable) {
+            var noEstaOcupat = true; //variable que fara d'interruptor en el cas de que on volem posicionar un jugador o fantasma ja estigui ocupat
+            do {
+
+                variable["x"] = generarNumeroAleatori(0, 29); //generem 2 numeros aleatoris per la x 
+                variable["y"] = generarNumeroAleatori(0, 29); //generem 2 numeros aleatoris per la y
+
+                if (tauler[variable["y"]][variable["x"]] !== "J" || tauler[variable["y"]][variable["x"]] !== "F") {//comprovem si esta ocupat
+                    noEstaOcupat = false;
+                }
+
+            } while ((esParet(variable["x"], variable["y"])) && noEstaOcupat === false);
+
+            if (typeof variable["direccioUsuari"] === 'undefined') { //si direccioUsuari es undefined significa que es un fantasma
+                //utilitzo un typeof perque em digui el tipus de la variable, si no esta definida, aquesta funcio retornara un undefined
+                //referencia: (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof)
+
+                tauler[variable["y"]][variable["x"]] = "F"; //F de fantasma
+            } else {//si no, es el jugador...
+                tauler[variable["y"]][variable["x"]] = "J"; //j de jugador
+            }
         }
 
         function esParet(x, y) {
@@ -116,14 +216,18 @@ and open the template in the editor.
             for (var i = 0; i < tauler.length; i++) {
                 document.write("<tr>");
 
-                    document.write("<td>");
-                        document.write("<span style='background-color: #ff7644;'>" + i + "</span>"); //pintem y
-                    document.write("</td>");
+                document.write("<td>");
+                document.write("<span style='background-color: #ff7644;'>" + i + "</span>"); //pintem y
+                document.write("</td>");
                 for (var j = 0; j < tauler.length; j++) {
                     document.write("<td>");
                     if (tauler[j][i] === 0) {
                         //diferenciem els limits
                         document.write("<span style='background-color: #474747;'>" + tauler[j][i] + "</span>");
+                    } else if (tauler[j][i] === "J") {
+                        document.write("<span style='background-color: red;'>" + tauler[j][i] + "</span>");
+                    } else if (tauler[j][i] === "F") {
+                        document.write("<span style='background-color: yellow;'>" + tauler[j][i] + "</span>");
                     }
                     document.write("</td>");
                 }
