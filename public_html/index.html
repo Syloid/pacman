@@ -112,7 +112,7 @@ and open the template in the editor.
 
             //Creem un array de 5 posicions (no usarem la 0), 
             //en el cual la posicio 1 sera amunt, el 2 dreta, 3 esquerra,...
-            //esta en aquest ordre perque sigui facil identificar, (va com les agulles del rellotje, encara que realment les posicions haurien de ser 0,3,6,9... pero com ho volem fer facil i es una cosa que qui programa ho sap ho deixo així)
+            //esta en aquest ordre perque sigui facil identificar, (va com les agulles del rellotge, encara que realment les posicions haurien de ser 0,3,6,9... pero com ho volem fer facil i es una cosa que qui programa ho sap ho deixo així)
 
             var comptarTotes = new Array(5);
             comptarTotes[1] = comptarAmunt;
@@ -131,6 +131,10 @@ and open the template in the editor.
             }
 
             variable["direccio"] = ultimMaxim; //finalment li diem que la direccio del fantasma o jugador es la de l'ultim Maxim
+        }
+        
+        function refrescarHTML() { //funcio per refrescar la pagina
+            document.body.innerHTML = '';
         }
 
         function inicialitzarCaracters() {
