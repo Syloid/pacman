@@ -67,7 +67,21 @@ and open the template in the editor.
 
         //Mostra el tauler
         mostrarTauler();
+        console.log(jugador["y"]);
         //mostra el tauler girat cap a l'esquerra perque comença a mostrar a la posicio 0,0 (part inferior esquerra)
+        setInterval(moviment, 1000);
+        function moviment() {
+            if (tauler[jugador["y"] + 1][jugador["x"]] === 1) {//Si es pot anar amunt al menys un cop
+                posicioActual = jugador["y"];
+                    tauler[jugador["y"]][jugador["x"]] = 1;
+                    jugador["y"] = jugador["y"] + 1;
+                    tauler[jugador["y"]][jugador["x"]] = 'J';
+
+                    refrescarHTML();
+                    mostrarTauler();
+
+            }
+        }
 
         function assignarDireccioInicial(variable) {
             //Creem 4 variables per comptar quant espai lliure n'hi ha respecte al jugador o fantasma
@@ -132,9 +146,9 @@ and open the template in the editor.
 
             variable["direccio"] = ultimMaxim; //finalment li diem que la direccio del fantasma o jugador es la de l'ultim Maxim
         }
-        
+
         function refrescarHTML() { //funcio per refrescar la pagina
-            document.body.innerHTML = '';
+            document.body.innerHTML ="<link rel='stylesheet' href='css/style.css'/>";
         }
 
         function inicialitzarCaracters() {
