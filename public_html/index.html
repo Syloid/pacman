@@ -54,10 +54,10 @@ and open the template in the editor.
         //Inicialitza variable jugador + 3 fantasmes
         inicialitzarCaracters();
         //Assignem una direcció inicial a cada variable
-        assignarDireccioInicial(jugador);
-        assignarDireccioInicial(fantasma1);
-        assignarDireccioInicial(fantasma2);
-        assignarDireccioInicial(fantasma3);
+        assignarDireccioInicial(jugador, 1);
+        assignarDireccioInicial(fantasma1, 1);
+        assignarDireccioInicial(fantasma2, 1);
+        assignarDireccioInicial(fantasma3, 1);
         //Comprovem direccions(1-Amunt, 2-Dreta, 3-Abaix, 4-Esquerra)
         document.write("Direccions: (1-Amunt, 2-Dreta, 3-Abaix, 4-Esquerra)<br>");
         document.write("Direccio Jugador: " + jugador["direccio"]);
@@ -71,132 +71,85 @@ and open the template in the editor.
         console.log("y: " + jugador["y"]);
         console.log("x: " + jugador["x"]);
         //mostra el tauler girat cap a l'esquerra perque comença a mostrar a la posicio 0,0 (part inferior esquerra)
-        setInterval(moviment, 1000, jugador);
-        setInterval(moviment, 1000, fantasma1);
-        setInterval(moviment, 1000, fantasma2);
-        setInterval(moviment, 1000, fantasma3);
 
-        function moviment(variable) {
-            var personatje = '';
-            if (typeof variable["direccioUsuari"] === 'undefined') {//si es fantasma
-                personatje = 'F'; //aquest es un if else que ens ajuda a no duplicar codi, perque si no ho agues pensat hauria copiat tots els if else d'abaix un altre vegada pel jugador/fantasma
-            } else {
-                personatje = 'J';
-            }
-            if (variable["direccio"] === 1 && tauler[variable["y"] + 1][variable["x"]] === 1) {//Si es pot anar amunt al menys un cop
-                tauler[variable["y"]][variable["x"]] = 1;
-                variable["y"] = variable["y"] + 1;
-                tauler[variable["y"]][variable["x"]] = personatje;
+        moviment = setInterval(moviment, 1000); //fem que cada segon s'executi la funcio del moviment on estaran les funcions que volem que es fasin cada segon
 
-            } else if (variable["direccio"] === 2 && tauler[variable["y"]][variable["x"] + 1] === 1) {//si dreta
-                tauler[variable["y"]][variable["x"]] = 1;
-                variable["x"] = variable["x"] + 1;
-                tauler[variable["y"]][variable["x"]] = personatje;
+        function moviment() {
+            moureFantasmes(fantasma1);//cridem al metode moureFantasmes el cual necesita un parametre jugador o fantasma
+            moureFantasmes(fantasma2);
+            moureFantasmes(fantasma3);
+            moureFantasmes(jugador);
 
-            } else if (variable["direccio"] === 3 && tauler[variable["y"] - 1][variable["x"]] === 1) { //Si es pot anar abaix
-                tauler[variable["y"]][variable["x"]] = 1;
-                variable["y"] = variable["y"] - 1;
-                tauler[variable["y"]][variable["x"]] = personatje;
-
-
-            } else if (variable["direccio"] === 4 && tauler[variable["y"]][variable["x"] - 1] === 1) {//si esquerra
-                tauler[variable["y"]][variable["x"]] = 1;
-                variable["x"] = variable["x"] - 1;
-                tauler[variable["y"]][variable["x"]] = personatje;
-
-            } else {
-                assignarDireccioInicial(variable);
-            }
-
-            refrescarHTML();
+            refrescarHTML();//cada vegada que executem aixo refresquem el html i mostrem el tauler
             mostrarTauler();
         }
 
-        function direccionsDisponibles(variable) {
-            var amunt = 0;
-            var abaix = 0;
-            var esquerra = 0;
-            var dreta = 0;
+        function moureFantasmes(variable) {
 
-            if (tauler[variable["y"] + 1][variable["x"]] === 1) {//si pot anar amunt
-                amunt = 1;
-            }
-            if (tauler[variable["y"] - 1][variable["x"]] === 1) {//Si es pot anar cap abaix 
-                abaix = 1;
-            }
-            if (tauler[variable["y"]][variable["x"] - 1] === 1) { //Si es pot anar cap a l'esquerra 
-                esquerra = 1;
-            }
-            if (tauler[variable["y"]][variable["x"] + 1] === 1) { //Si es pot anar cap a la dreta
-                dreta = 1;
-            }
+            if (direccioSeguentEsParet(variable) === false || esCruella(variable) === false) { //aquest metode mou els fantasmes/jugador si no esta en una cruella o la seguent posicio no es paret
+                moureXY(variable);
 
-            return amunt + abaix + esquerra + dreta; //retornem el numero de les direccions disponibles
-
+            } else { //si es paret o es cruella li asignara una nova direccio i fara el moviment
+                assignarDireccioInicial(variable, 0);
+                moureXY(variable);
+            }
         }
 
-        /*function novaDireccio(variable) {
-         var amunt = 0;
-         var abaix = 0;
-         var esquerra = 0;
-         var dreta = 0;
-         
-         if (tauler[variable["y"] + 1][variable["x"]] === 1) {//si pot anar amunt
-         amunt = 1;
-         }
-         if (tauler[variable["y"] - 1][variable["x"]] === 1) {//Si es pot anar cap abaix 
-         abaix = 3;
-         }
-         if (tauler[variable["y"]][variable["x"] - 1] === 1) { //Si es pot anar cap a l'esquerra 
-         esquerra = 4;
-         }
-         if (tauler[variable["y"]][variable["x"] + 1] === 1) { //Si es pot anar cap a la dreta
-         dreta = 2;
-         }
-         
-         var guardarDireccions = new Array(4);
-         guardarDireccions[0] = amunt;
-         guardarDireccions[1] = dreta;
-         guardarDireccions[2] = abaix;
-         guardarDireccions[3] = esquerra;
-         //+1
-         var random = 0;
-         provarAltreNumero = false;
-         do {
-         random = generarNumeroAleatori(0, 3);
-         
-         if (guardarDireccions[random] === 0) {
-         provarAltreNumero = true;
-         }
-         } while (provarAltreNumero);
-         
-         variable["direccio"] = guardarDireccions[random];
-         alert(variable["direccio"]);
-         if (variable["direccio"] === 1 && tauler[variable["y"] + 1][variable["x"]] === 1 && direccionsDisponibles(variable) < 3) {//Si es pot anar amunt al menys un cop
-         tauler[variable["y"]][variable["x"]] = 1;
-         variable["y"] = variable["y"] + 1;
-         tauler[variable["y"]][variable["x"]] = personatje;
-         
-         } else if (variable["direccio"] === 2 && tauler[variable["y"]][variable["x"] + 1] === 1 && direccionsDisponibles(variable) < 3) {//si dreta
-         tauler[variable["y"]][variable["x"]] = 1;
-         variable["x"] = variable["x"] + 1;
-         tauler[variable["y"]][variable["x"]] = personatje;
-         
-         } else if (variable["direccio"] === 3 && tauler[variable["y"] - 1][variable["x"]] === 1 && direccionsDisponibles(variable) < 3) { //Si es pot anar abaix
-         tauler[variable["y"]][variable["x"]] = 1;
-         variable["y"] = variable["y"] - 1;
-         tauler[variable["y"]][variable["x"]] = personatje;
-         
-         
-         } else if (variable["direccio"] === 4 && tauler[variable["y"]][variable["x"] - 1] === 1 && direccionsDisponibles(variable) < 3) {//si esquerra
-         tauler[variable["y"]][variable["x"]] = 1;
-         variable["x"] = variable["x"] - 1;
-         tauler[variable["y"]][variable["x"]] = personatje;
-         
-         }
-         }*/
+        function moureXY(variable) {
+            var personatje = 'F';
 
-        function assignarDireccioInicial(variable) {
+            if (typeof variable["direccioUsuari"] === 'undefined') {//si es un fantasma
+                //referencia: (https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/typeof)
+                personatje = 'F'; //el que printarem al tauler sera una F
+            } else {
+                personatje = 'J'; //si no una J
+
+            }
+
+            if (direccioSeguentEsParet(variable)) {
+                assignarDireccioInicial(variable, 0); //no se per que hi ha vegades que entra aqui amb la seguent posicio sent paret... per aixo poso aquest if
+            }
+
+            switch (variable["direccio"]) {
+                case 1: //si es esquerra
+                    if (tauler[variable["y"] + 1][variable["x"]] !== 0) {//i pot anar cap a aquesta direccio
+                        tauler[variable["y"]][variable["x"]] = 1; //la seva posicio actual la pasem a ser un 1
+                        variable["y"] = variable["y"] + 1; //sumem 1 posicio endevant
+                        tauler[variable["y"]][variable["x"]] = personatje; //i finalment posem el fantasma/jugador al tauler
+                    }
+                    break;
+                case 2: //si es dreta
+                    if (tauler[variable["y"]][variable["x"] + 1] !== 0) {
+                        tauler[variable["y"]][variable["x"]] = 1;
+                        variable["x"] = variable["x"] + 1;
+                        tauler[variable["y"]][variable["x"]] = personatje;
+                    }
+                    break;
+                case 3://si es abaix
+                    if (tauler[variable["y"] - 1][variable["x"]] !== 0) {
+                        tauler[variable["y"]][variable["x"]] = 1;
+                        variable["y"] = variable["y"] - 1;
+                        tauler[variable["y"]][variable["x"]] = personatje;
+                    }
+                    break;
+                case 4://si es amunt
+                    if (tauler[variable["y"]][variable["x"] - 1] !== 0) {
+                        tauler[variable["y"]][variable["x"]] = 1;
+                        variable["x"] = variable["x"] - 1;
+                        tauler[variable["y"]][variable["x"]] = personatje;
+
+                    }
+                default:
+                    assignarDireccioInicial(variable, 0);
+            }
+        }
+        
+        function assignarDireccioInicial(variable, inicialitzarPacman) {
+            //en aquest metode pasem dos parametres, la variable que inicialitzem i un numero...
+            //aquest numero determina si es la primera vegada que inicialitzem aquesta funcio, perque ens interesa que quan sigui la primera vegada que hem iniciat el joc
+            //la direccio que ens asigna sigui la que te mes caselles per tal de evitar en cas de que estiguem a prop d'un fantasma no ens atrapi en un 3 i no res
+            //
+            //
             //Creem 4 variables per comptar quant espai lliure n'hi ha respecte al jugador o fantasma
             var comptarAmunt = 0;
             var comptarAbaix = 0;
@@ -245,28 +198,32 @@ and open the template in the editor.
             comptarTotes[2] = comptarDreta;
             comptarTotes[3] = comptarAbaix;
             comptarTotes[4] = comptarEsquerra;
-            var max = -1; //fem una variable per saber quin es el maxim, iniciem a -1 perque qualsevol valor sigui el maxim per minim que sigui
-            var ultimMaxim = 0; //ultim maxim emmagatzemara la ultima i de la direccio amb mes espais lliures
-            //per aixi saber quina es la direccio mes correcta per començar
-            //
-            var random;
-            do {
-                random = generarNumeroAleatori(1, 4);
+
+            if (inicialitzarPacman === 0) { //si no es la primera vegada que inicialitzem el joc, triara una direccio random que no sigui ni un 0 ni la direccio contraria a la que estava anant
+                var random;
+                do {
+                    random = generarNumeroAleatori(1, 4);
 
 
-            } while (comptarTotes[random] === 0 || random === getDireccioContraria(variable));
+                } while (comptarTotes[random] === 0 || random === getDireccioContraria(variable));
 
-            variable["direccio"] = random;
-            //for (var i = 1; i < comptarTotes.length; i++) {
-            //    if (comptarTotes[i] >= max) { //en el cas de que sigui un valor igual al maxim, el maxim sera l'ultim igual (es podria allargar la funcio amb un random per escollir quin dels dos, pero ho veig be aixi)
-            //        max = comptarTotes[i];
-            //        ultimMaxim = i;
-            //    }
-            //}
+                variable["direccio"] = random;
 
-            //variable["direccio"] = ultimMaxim; //finalment li diem que la direccio del fantasma o jugador es la de l'ultim Maxim
+            } else {//si es la primera vegada que inicialitzem el joc, contarem quina es la direccio amb mes espai.
+                var max = -1; //fem una variable per saber quin es el maxim, iniciem a -1 perque qualsevol valor sigui el maxim per minim que sigui
+                var ultimMaxim = 0; //ultim maxim emmagatzemara la ultima 'i' de la direccio amb més espais lliures
+                //per aixi saber quina es la direccio més correcta per començar
+                for (var i = 1; i < comptarTotes.length; i++) {
+                    if (comptarTotes[i] >= max) { //en el cas de que sigui un valor igual al maxim, el maxim sera l'ultim igual (es podria allargar la funcio amb un random per escollir quin dels dos, pero ho veig be aixi)
+                        max = comptarTotes[i];
+                        ultimMaxim = i;
+                    }
+                }
+
+                variable["direccio"] = ultimMaxim; //finalment li diem que la direccio del fantasma o jugador es la de l'ultim Maxim
+            }
         }
-        function getDireccioContraria(variable) {
+        function getDireccioContraria(variable) { //funcio que ens diu quina es la direccio contraria de la direccio actual
             var direccio = variable["direccio"];
             var contraria;
 
@@ -331,7 +288,7 @@ and open the template in the editor.
                     noEstaOcupat = false;
                 }
 
-            } while ((esParet(variable["x"], variable["y"])) && noEstaOcupat === false);
+            } while (esParet(variable) && noEstaOcupat === false);
 
             if (typeof variable["direccioUsuari"] === 'undefined') { //si direccioUsuari es undefined significa que es un fantasma
                 //utilitzo un typeof perque em digui el tipus de la variable, si no esta definida, aquesta funcio retornara un undefined
@@ -343,9 +300,57 @@ and open the template in the editor.
             }
         }
 
-        function esParet(x, y) {
+        function esCruella(variable) {
+            var amunt = 0;
+            var abaix = 0;
+            var esquerra = 0;
+            var dreta = 0;
+
+            if (tauler[variable["y"] + 1][variable["x"]] === 1) {//si pot anar amunt
+                amunt = 1;
+            }
+            if (tauler[variable["y"] - 1][variable["x"]] === 1) {//Si es pot anar cap abaix 
+                abaix = 1;
+            }
+            if (tauler[variable["y"]][variable["x"] - 1] === 1) { //Si es pot anar cap a l'esquerra 
+                esquerra = 1;
+            }
+            if (tauler[variable["y"]][variable["x"] + 1] === 1) { //Si es pot anar cap a la dreta
+                dreta = 1;
+            }
+
+            var suma = amunt + abaix + esquerra + dreta; //sumem el total de direccions disponibles
+
+            if (suma >= 2) { //se que una cruella es quan son 3 o mes, pero com al meu tauler n'hi ha tan pocs he reduit el numero a 2
+                return true;
+
+            } else {
+                return false;
+            }
+        }
+
+
+        function direccioSeguentEsParet(variable) { //funcio que comprova si la posicio en la que vol anar un fantasma o jugador es paret
+            var x = variable["x"];
+            var y = variable["y"];
+            var direccio = variable["direccio"];
+
+            if (direccio === 1 && tauler[y + 1][x] === 0) {//si amunt
+                return true;
+            } else if (direccio === 2 && tauler[y][x + 1] === 0) { //dreta
+                return true;
+            } else if (direccio === 3 && tauler[y - 1][x] === 0) {//abaix
+                return true;
+            } else if (direccio === 4 && tauler[y][x - 1] === 0) {//esquerra
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function esParet(variable) {
             //aquesta funcio ens diu si es paret o no la x i la y que li pasem per parametre
-            if (tauler[y][x] === 0) { //primer comença a comprobar la y perque el tauler el tinc de manera que la posició 0,0 es la part inferior esquerra
+            if (tauler[variable["y"]][variable["x"]] === 0) { //primer comença a comprobar la y perque el tauler el tinc de manera que la posició 0,0 es la part inferior esquerra
                 return true;
             } else {
                 return false;
