@@ -71,21 +71,38 @@ and open the template in the editor.
         //mostra el tauler girat cap a l'esquerra perque comença a mostrar a la posicio 0,0 (part inferior esquerra)
         primerMovimentJugador = true; //variable booleana global que emmagatzema si es la primera vegada en el joc que el jugador es mou
         //escoltarTeclat();//on inicialitzarem totes les direccions del teclat
-        moviment = setInterval(moviment, 1000); //fem que cada segon s'executi la funcio del moviment on estaran les funcions que volem que es fasin cada segon
+        element = document.getElementById("all");
+        element.addEventListener("keydown", notificaObservador);
 
-        var element = document.getElementById("all").onkeydown = notificaObservador;
-        //element.addEventListener("onkeydown", notificaObservador);
+        moviment = setInterval(moviment, 100); //fem que cada segon s'executi la funcio del moviment on estaran les funcions que volem que es fasin cada segon
+
+
 
         function notificaObservador(e) {
             console.log("Event " + e.keyCode);
+            alert('a');
             if (e.keyCode === 38) {//amunt
                 jugador["direccioUsuari"] = 1;
+                alert('amunt');
             } else if (e.keyCode === 40) {//abaix
                 jugador["direccioUsuari"] = 3;
+                alert('abaix');
             } else if (e.keyCode === 37) {//esquerra
                 jugador["direccioUsuari"] = 4;
+                alert('esquerra');
             } else if (e.keyCode === 39) {//dreta
                 jugador["direccioUsuari"] = 2;
+                alert('dreta');
+            }
+
+        }
+
+        function comprovarDireccioValida() {
+            var direccio = jugador["direccioUsuari"];
+            if (!direccioDesitjadaEsParet(jugador)) {
+                jugador["direccio"] = direccio;
+                moureXY(jugador);
+
             }
 
         }
@@ -102,14 +119,14 @@ and open the template in the editor.
 
         function moureJugador() {
 
-            if (direccioSeguentEsParet(jugador) === false || esCruella(jugador) === false || primverMovimentJugador === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruella o la seguent posicio no es paret
+            if (direccioDesitjadaEsParet(jugador)) {
+                comprovarDireccioValida();
+            } else if (direccioSeguentEsParet(jugador) === false || primverMovimentJugador === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruella o la seguent posicio no es paret
                 moureXY(jugador);
                 primverMovimentJugador = false;
             } else { //si es paret o es cruella li asignara una nova direccio i fara el moviment
-
-                moureXY(jugador);
+                comprovarDireccioValida();
             }
-
         }
 
         function moureFantasmes(variable) {
@@ -134,9 +151,9 @@ and open the template in the editor.
 
             }
 
-            if (direccioSeguentEsParet(variable)) {
-                assignarDireccioInicial(variable, 0); //no se per que hi ha vegades que entra aqui amb la seguent posicio sent paret... per aixo poso aquest if
-            }
+            //if (direccioSeguentEsParet(variable)) {
+            //    assignarDireccioInicial(variable, 0); //no se per que hi ha vegades que entra aqui amb la seguent posicio sent paret... per aixo poso aquest if
+            // }
 
             switch (variable["direccio"]) {
                 case 1: //si es esquerra
@@ -168,7 +185,11 @@ and open the template in the editor.
 
                     }
                 default:
-                    assignarDireccioInicial(variable, 0);
+                    if (personatje === 'F') {
+
+
+                        assignarDireccioInicial(variable, 0);
+                    }
             }
         }
 
@@ -357,6 +378,23 @@ and open the template in the editor.
             }
         }
 
+        function direccioDesitjadaEsParet(variable) { //funcio que comprova si la posicio en la que vol anar jugador es paret
+            var x = variable["x"];
+            var y = variable["y"];
+            var direccio = variable["direccioUsuari"];
+
+            if (direccio === 1 && tauler[y + 1][x] === 0) {//si amunt
+                return true;
+            } else if (direccio === 2 && tauler[y][x + 1] === 0) { //dreta
+                return true;
+            } else if (direccio === 3 && tauler[y - 1][x] === 0) {//abaix
+                return true;
+            } else if (direccio === 4 && tauler[y][x - 1] === 0) {//esquerra
+                return true;
+            } else {
+                return false;
+            }
+        }
 
         function direccioSeguentEsParet(variable) { //funcio que comprova si la posicio en la que vol anar un fantasma o jugador es paret
             var x = variable["x"];
