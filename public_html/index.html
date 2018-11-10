@@ -12,6 +12,16 @@ and open the template in the editor.
         <link rel="stylesheet" href="css/style.css"/>
     </head>
     <body id="all">
+
+        <img src="img/0.png"    id="paret"    style="display: none;">
+        <img src="img/1.png"       id="pasadis"       style="display: none;">
+        <img src="img/f.png" id="fantasma" style="display: none;">
+        <img src="img/j.png" id="jugador" style="display: none;">
+
+        <!-- Espai de dibuix -->
+        <div style="text-align: center;">
+        <canvas id="espai" width="720" height="720"> </canvas>
+        </div>
     </body>
     <script>
         tauler = new Array(30);
@@ -64,35 +74,64 @@ and open the template in the editor.
         document.write("<br>Direccio fantasma1: " + fantasma1["direccio"]);
         document.write("<br>Direccio fantasma2: " + fantasma2["direccio"]);
         document.write("<br>Direccio fantasma3: " + fantasma3["direccio"]);
+        
+        segonsRefresc = 0.2*1000;
 
 
         //Mostra el tauler
-        mostrarTauler();
+        //mostrarTauler();
         //mostra el tauler girat cap a l'esquerra perque comença a mostrar a la posicio 0,0 (part inferior esquerra)
         primerMovimentJugador = true; //variable booleana global que emmagatzema si es la primera vegada en el joc que el jugador es mou
-        //escoltarTeclat();//on inicialitzarem totes les direccions del teclat
         element = document.getElementById("all");
         element.addEventListener("keydown", notificaObservador);
 
-        moviment = setInterval(moviment, 100); //fem que cada segon s'executi la funcio del moviment on estaran les funcions que volem que es fasin cada segon
+        moviment = setInterval(moviment, segonsRefresc); //fem que cada segon s'executi la funcio del moviment on estaran les funcions que volem que es fasin cada segon
+
+        //funció que pinta a l'espai definit el tauler decodificat
+        function pinta()
+        {
+            var canvas = document.getElementById("espai");
+            var ctx = canvas.getContext("2d");
+            var img;
+            for (var i = 0; i < tauler.length; i++)
+            {
+                for (var j = 0; j < tauler[i].length; j++)
+                {
+                    if (tauler[j][i] === 1) {
+                        img = document.getElementById("pasadis");
+                    }     //1 és la galaxia
+                    else if (tauler[j][i] === 0) {
+                        img = document.getElementById("paret");
+                    } //2 és Yoda
+                    else if (tauler[j][i] === 'F') {
+                        img = document.getElementById("fantasma");
+                    } else if (tauler[j][i] === 'J') {
+                        img = document.getElementById("jugador");
+                    }//3 és el malaguanyat Darth vader   
+                    ctx.drawImage(img, i*24, j*24 , 400, 400);
+                }
+            }
+        }
+            //pinta();
+            // funció que executa la funció "pinta" cada segon (1000 milisegons és un segon)
+            window.setInterval(pinta, segonsRefresc);
 
 
 
         function notificaObservador(e) {
             console.log("Event " + e.keyCode);
-            alert('a');
             if (e.keyCode === 38) {//amunt
                 jugador["direccioUsuari"] = 1;
-                alert('amunt');
+                //alert('amunt');
             } else if (e.keyCode === 40) {//abaix
                 jugador["direccioUsuari"] = 3;
-                alert('abaix');
+                //alert('abaix');
             } else if (e.keyCode === 37) {//esquerra
                 jugador["direccioUsuari"] = 4;
-                alert('esquerra');
+                //alert('esquerra');
             } else if (e.keyCode === 39) {//dreta
                 jugador["direccioUsuari"] = 2;
-                alert('dreta');
+                //alert('dreta');
             }
 
         }
@@ -113,8 +152,8 @@ and open the template in the editor.
             moureFantasmes(fantasma3);
             moureJugador();
 
-            refrescarHTML();//cada vegada que executem aixo refresquem el html i mostrem el tauler
-            mostrarTauler();
+            //refrescarHTML();//cada vegada que executem aixo refresquem el html i mostrem el tauler
+            //mostrarTauler();
         }
 
         function moureJugador() {
