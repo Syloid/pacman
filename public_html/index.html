@@ -138,23 +138,23 @@ and open the template in the editor.
         }
 
         function moureJugador() {
-            if (primerMovimentJugador === false) { //si l'usuari ja ha pres un boto pel teclat
-                if (jugador["direccioUsuari"] !== 0) { //si la direccio del usuari no es 0
-                    if (direccioDesitjadaEsParet(jugador) === false) { //i la direccio en la que vol anar no es paret 
-                        comprovarDireccioValida();
-                    } else if (direccioSeguentEsParet(jugador) === false || primerMovimentJugador === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruella o la seguent posicio no es paret
-                        moureXY(jugador);
-                    }
-                }
-            } else {//si l'usuari no ha pres cap boto pel teclat fara el moviment del jugador com si fos un fantasma fins que prenem un boto
-                if (esCruella(jugador) === true || direccioSeguentEsParet(jugador) === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruella o la seguent posicio no es paret
-                    assignarDireccioInicial(jugador, 0);
+
+            if (jugador["direccioUsuari"] !== 0) {
+                if (direccioDesitjadaEsParet(jugador) === false) {
+                    comprovarDireccioValida();
+                } else if (direccioSeguentEsParet(jugador) === false || primerMovimentJugador === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruella o la seguent posicio no es paret
                     moureXY(jugador);
-                } else {
-                    moureXY(jugador);
+                    primerMovimentJugador = false;
+                } else { //si es paret o es cruella li asignara una nova direccio i fara el moviment
+                    comprovarDireccioValida();
                 }
+            } else {
+                assignarDireccioInicial(jugador, 1);
+                jugador["direccioUsuari"] = jugador["direccio"];
+                moureXY(jugador);
 
             }
+
         }
 
         function moureFantasmes(variable) {
