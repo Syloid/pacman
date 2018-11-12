@@ -24,6 +24,9 @@ and open the template in the editor.
         <!-- Espai de dibuix -->
         <div style="text-align: center;">
             <canvas id="espai" width="720" height="720"> </canvas>
+            <div class="agrupar">
+                <p>Temps: <span id="compte"></span></p>
+                <div id="puntuacio" width="300" height="100"></div></div>
         </div>
     </body>
     <script>
@@ -67,15 +70,44 @@ and open the template in the editor.
         assignarDireccioInicial(fantasma1, 1);
         assignarDireccioInicial(fantasma2, 1);
         assignarDireccioInicial(fantasma3, 1);
-
         segonsRefresc = 1 * 100; //variable per posar els segons que volem que es fasi 
 
         primerMovimentJugador = true; //variable booleana global que emmagatzema si es la primera vegada en el joc que el jugador es mou
+        haPerdut = false;
+        puntuacio = 0;
         listener = document.getElementById("all");
         listener.addEventListener("keydown", notificaObservador);
 
         moviment = setInterval(moviment, segonsRefresc); //fem que cada segon s'executi la funcio del moviment on estaran les funcions que volem que es fasin cada segon
+        window.setInterval(pinta, segonsRefresc);
+        compteEnrere();
 
+        function compteEnrere() {
+            var tempsrestant = 5 * 60;
+            var temps = setInterval(function () {
+                tempsrestant--;
+                puntuacio += 1;
+                var minuts = Math.floor(tempsrestant / 60);
+                var segons = Math.floor(tempsrestant - minuts * 60);
+                if (segons.toString().length < 1) {
+                    segons = +0;
+                }
+                document.getElementById("compte").textContent = minuts + ":" + segons;
+                if (tempsrestant <= 0) {
+                    alert("Has guanyat\n\nPuntuació: " + puntuacio);
+                    if (typeof buscarCookie("maxPuntuacio") === 'undefined') {
+                        afegirCookie("maxPuntuacio", puntuacio, 7);
+                    } else {
+                        if (buscarCookie("maxPuntuacio") < puntuacio) {
+                            afegirCookie("maxPuntuacio", puntuacio, 7);
+                        }
+                    }
+                    puntuacio = 0;
+                    location.reload();
+                    clearInterval(temps);
+                }
+            }, 1000);
+        }
 
         function pinta() {
             var canvas = document.getElementById("espai");
@@ -96,9 +128,6 @@ and open the template in the editor.
                 }
             }
         }
-        window.setInterval(pinta, segonsRefresc);
-
-
 
         function notificaObservador(e) {
             console.log("Event " + e.keyCode);
@@ -129,23 +158,35 @@ and open the template in the editor.
         }
 
         function moviment() {
-            //cridem al metode moureFantasmes el cual necesita un parametre jugador o fantasma
-            moureFantasmes(fantasma1);
-            moureFantasmes(fantasma2);
-            moureFantasmes(fantasma3);
-            //pel jugador utilitzarem un metode diferent
-            moureJugador();
+            if (haPerdut === false) {
+                //cridem al metode moureFantasmes el cual necesita un parametre jugador o fantasma
+                moureFantasmes(fantasma1);
+                moureFantasmes(fantasma2);
+                moureFantasmes(fantasma3);
+                //pel jugador utilitzarem un metode diferent
+                moureJugador();
+                document.getElementById("puntuacio").innerHTML = "Puntuació: " + puntuacio + "<br>Màxmia puntuació: " + maximaPuntuacio();
+            } else {
+                reiniciarJoc();
+            }
         }
-
+        function maximaPuntuacio() {
+            if (typeof buscarCookie("maxPuntuacio") === 'undefined') {
+                afegirCookie("maxPuntuacio", 0, 7);
+                return buscarCookie("maxPuntuacio");
+            } else {
+                return buscarCookie("maxPuntuacio");
+            }
+        }
         function moureJugador() {
 
-            if (jugador["direccioUsuari"] !== 0) {
-                if (direccioDesitjadaEsParet(jugador) === false) {
-                    comprovarDireccioValida();
-                } else if (direccioSeguentEsParet(jugador) === false || primerMovimentJugador === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruella o la seguent posicio no es paret
+            if (jugador["direccioUsuari"] !== 0) { //si l'usuari ha pulsat algun boto
+                if (direccioDesitjadaEsParet(jugador) === false) { //si la direccio que ha pulsat l'usuari no es paret
+                    comprovarDireccioValida();//posali la direccio a fantassma/jugador['direccio'] i fa el moviment
+                } else if (direccioSeguentEsParet(jugador) === false || primerMovimentJugador === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruilla o la seguent posicio no es paret
                     moureXY(jugador);
                     primerMovimentJugador = false;
-                } else { //si es paret o es cruella li asignara una nova direccio i fara el moviment
+                } else { //si es paret o es cruilla li asignara una nova direccio i fara el moviment
                     comprovarDireccioValida();
                 }
             } else {
@@ -159,7 +200,7 @@ and open the template in the editor.
 
         function moureFantasmes(variable) {
 
-            if (esCruella(variable) === true || direccioSeguentEsParet(variable) === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruella o la seguent posicio no es paret
+            if (esCruilla(variable) === true || direccioSeguentEsParet(variable) === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruilla o la seguent posicio no es paret
                 assignarDireccioInicial(variable, 0);
                 moureXY(variable);
             } else {
@@ -167,6 +208,19 @@ and open the template in the editor.
             }
         }
 
+        function reiniciarJoc() {
+            alert('Has perdut');//printem que hem perdut
+
+            if (typeof buscarCookie("maxPuntuacio") === 'undefined') {
+                afegirCookie("maxPuntuacio", puntuacio, 7);
+            } else {
+                if (buscarCookie("maxPuntuacio") < puntuacio) {
+                    afegirCookie("maxPuntuacio", puntuacio, 7);
+                }
+            }
+            puntuacio = 0;
+            location.reload(); //refresquem la pagina
+        }
         function moureXY(variable) {
             var personatje = '';//variable personatje que sera una f o j depenent si es fantasma o jugador
 
@@ -179,44 +233,36 @@ and open the template in the editor.
 
             if (variable['direccio'] === 1 && amuntEs0(variable) === false) {//si la direccio del fantasma/jugador es amunt y lo que te devant seu no es una paret...
                 if (tauler[variable['y'] + 1][variable['x']] === 'J') {//i el que te devant seu es una J de jugador, significa que el fantasma es menja al jugador
-                    alert('Has perdut');//printem que hem perdut
-                    location.reload(); //refresquem la pagina
+                    haPerdut = true;
                 } else if (personatje === 'J' && tauler[variable['y'] + 1][variable['x']] === 'F') {//si som el jugador i resulta que on volem anar hi ha un fantsama significa que en l'hem menjat
-                    alert('Has perdut');//printem que hem perdut
-                    location.reload(); //refresquem pagina
+                    haPerdut = true;
                 }
                 tauler[variable['y']][variable['x']] = 1;//el que tenim a la posicio de la variable posem un 1 de pasadis
                 variable['y']++;//incrementem la posicio +1
                 tauler[variable['y']][variable['x']] = personatje; //i finalment li diem al tauler que a la posicio de la variable hi esta el fantasma/jugador
             } else if (variable['direccio'] === 2 && dretaEs0(variable) === false) {
                 if (tauler[variable['y']][variable['x'] + 1] === 'J') {
-                    alert('Has perdut');
-                    location.reload();
+                    haPerdut = true;
                 } else if (personatje === 'J' && tauler[variable['y']][variable['x'] + 1] === 'F') {
-                    alert('Has perdut');
-                    location.reload();
+                    haPerdut = true;
                 }
                 tauler[variable["y"]][variable["x"]] = 1;
                 variable['x']++;
                 tauler[variable["y"]][variable["x"]] = personatje;
             } else if (variable['direccio'] === 3 && abaixEs0(variable) === false) {
                 if (tauler[variable['y'] - 1][variable['x']] === 'J') {
-                    alert('Has perdut');
-                    location.reload();
+                    haPerdut = true;
                 } else if (personatje === 'J' && tauler[variable['y'] - 1][variable['x']] === 'F') {
-                    alert('Has perdut');
-                    location.reload();
+                    haPerdut = true;
                 }
                 tauler[variable['y']][variable['x']] = 1;
                 variable['y']--;
                 tauler[variable['y']][variable['x']] = personatje;
             } else if (variable['direccio'] === 4 && esquerraEs0(variable) === false) {
                 if (tauler[variable['y']][variable['x'] - 1] === 'J') {
-                    alert('Has perdut');
-                    location.reload();
+                    haPerdut = true;
                 } else if (personatje === 'J' && tauler[variable['y']][variable['x'] - 1] === 'F') {
-                    alert('Has perdut');
-                    location.reload();
+                    haPerdut = true;
                 }
                 tauler[variable["y"]][variable["x"]] = 1;
                 variable['x']--;
@@ -365,8 +411,6 @@ and open the template in the editor.
                 var random;
                 do {
                     random = generarNumeroAleatori(1, 4);
-
-
                 } while (comptarTotes[random] === 0 || random === getDireccioContraria(variable));
 
                 variable["direccio"] = random;
@@ -470,7 +514,7 @@ and open the template in the editor.
             }
         }
 
-        function esCruella(variable) {
+        function esCruilla(variable) {
             var amunt = 0;
             var abaix = 0;
             var esquerra = 0;
@@ -491,7 +535,7 @@ and open the template in the editor.
 
             var suma = amunt + abaix + esquerra + dreta; //sumem el total de direccions disponibles
 
-            if (suma >= 3) { //si la suma es 3 o mes significa que es cruella
+            if (suma >= 3) { //si la suma es 3 o mes significa que es cruilla
                 return true;
 
             } else {
@@ -510,6 +554,29 @@ and open the template in the editor.
 
         function generarNumeroAleatori(min, max) { //genera un numero aleatori
             return Math.round(Math.random() * ((max) - min) + min);
+        }
+
+        function afegirCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        function buscarCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0) == ' ')
+                    c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0)
+                    return c.substring(nameEQ.length, c.length);
+            }
+            return null;
         }
 
     </script>
