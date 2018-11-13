@@ -23,10 +23,11 @@ and open the template in the editor.
 
         <!-- Espai de dibuix -->
         <div style="text-align: center;">
-            <canvas id="espai" width="720" height="720"> </canvas>
-            <div class="agrupar">
+             <div class="agrupar">
                 <p>Temps: <span id="compte"></span></p>
                 <div id="puntuacio" width="300" height="100"></div></div>
+            <canvas id="espai" width="580" height="580"> </canvas>
+           
         </div>
     </body>
     <script>
@@ -171,11 +172,10 @@ and open the template in the editor.
             }
         }
         function maximaPuntuacio() {
-            if (typeof buscarCookie("maxPuntuacio") === 'undefined') {
-                afegirCookie("maxPuntuacio", 0, 7);
-                return buscarCookie("maxPuntuacio");
+            if (buscarCookie("maxPuntuacio") === null) {//si la cookie no esta posada (primera vegada que s'executa)
+                return 0;
             } else {
-                return buscarCookie("maxPuntuacio");
+                return buscarCookie("maxPuntuacio");//si tenim cookie mostrem el seu valor
             }
         }
         function moureJugador() {
@@ -209,7 +209,7 @@ and open the template in the editor.
         }
 
         function reiniciarJoc() {
-            alert('Has perdut');//printem que hem perdut
+            alert('Has perdut\nPuntuació: '+puntuacio);//printem que hem perdut
 
             if (typeof buscarCookie("maxPuntuacio") === 'undefined') {
                 afegirCookie("maxPuntuacio", puntuacio, 7);
@@ -273,7 +273,7 @@ and open the template in the editor.
         function fantasmesSonAprop(variable) { //metode que ens diu si ni han fantasmes a prop (falta millorar)
             var hiHaFantasma = false;
             try {
-                for (var i = 1; i <= 3; i++) {
+                for (var i = 1; i <= 6; i++) {
 
                     if (tauler[variable["y"] + i][vairable["x"]] === 'F') {
                         hiHaFantasma === true;
@@ -325,6 +325,21 @@ and open the template in the editor.
 
         }
 
+        function esSurtDelTauler(variable) {
+            var posicions = 6;
+            if (variable["x"] + posicions >= 29) {
+                return true;
+            } else if (variable["y"] + posicions >= 29) {
+                return true;
+            } else if (variable["x"] - posicions <= 0) {
+                return true;
+            } else if (variable["x"] - posicions >= 29) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         function posicionaAlTauler(variable) {
             var noEstaOcupat = true; //variable que fara d'interruptor en el cas de que on volem posicionar un jugador o fantasma ja estigui ocupat
             do {
@@ -336,7 +351,7 @@ and open the template in the editor.
                     noEstaOcupat = false;
                 }
 
-                if (fantasmesSonAprop(variable)) { //comprovem si a la posicio que li ha asignat hi han fantasmes a prop 
+                if (fantasmesSonAprop(variable) || esSurtDelTauler(variable)) { //comprovem si a la posicio que li ha asignat hi han fantasmes a prop 
                     noEstaOcupat === false;
                 }
 
