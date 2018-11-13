@@ -9,8 +9,10 @@ and open the template in the editor.
         <title>Pac-Man</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="css/bootstrap.min.css"/>
         <link rel="stylesheet" href="css/style.css"/>
         <link rel="shortcut icon" type="image/png" href="ico/favicon.png"/>
+        
     </head>
     <body id="all">
 
@@ -22,12 +24,14 @@ and open the template in the editor.
         <img src="img/j.png" id="jugador" style="display: none;">
 
         <!-- Espai de dibuix -->
-        <div style="text-align: center;">
-             <div class="agrupar">
+        <div class="">
+
+            <div class="tauler"> <canvas id="espai" width="550" height="550"> </canvas></div>
+            <div class="left col-3">
                 <p>Temps: <span id="compte"></span></p>
-                <div id="puntuacio" width="300" height="100"></div></div>
-            <canvas id="espai" width="580" height="580"> </canvas>
-           
+                <div id="puntuacio" width="300" height="100"></div>
+            </div>
+
         </div>
     </body>
     <script>
@@ -79,10 +83,10 @@ and open the template in the editor.
         listener = document.getElementById("all");
         listener.addEventListener("keydown", notificaObservador);
 
-        moviment = setInterval(moviment, segonsRefresc); //fem que cada segon s'executi la funcio del moviment on estaran les funcions que volem que es fasin cada segon
-        window.setInterval(pinta, segonsRefresc);
-        compteEnrere();
-
+        /*moviment = setInterval(moviment, segonsRefresc); //fem que cada segon s'executi la funcio del moviment on estaran les funcions que volem que es fasin cada segon
+         window.setInterval(pinta, segonsRefresc);
+         compteEnrere();
+         */
         function compteEnrere() {
             var tempsrestant = 5 * 60;
             var temps = setInterval(function () {
@@ -209,7 +213,7 @@ and open the template in the editor.
         }
 
         function reiniciarJoc() {
-            alert('Has perdut\nPuntuació: '+puntuacio);//printem que hem perdut
+            alert('Has perdut\nPuntuació: ' + puntuacio);//printem que hem perdut
 
             if (typeof buscarCookie("maxPuntuacio") === 'undefined') {
                 afegirCookie("maxPuntuacio", puntuacio, 7);
