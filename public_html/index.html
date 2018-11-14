@@ -12,7 +12,7 @@ and open the template in the editor.
         <link rel="stylesheet" href="css/bootstrap.min.css"/>
         <link rel="stylesheet" href="css/style.css"/>
         <link rel="shortcut icon" type="image/png" href="ico/favicon.png"/>
-        
+
     </head>
     <body id="all">
 
@@ -22,15 +22,16 @@ and open the template in the editor.
         <img src="img/1.png"       id="pasadis"       style="display: none;">
         <img src="img/f.png" id="fantasma" style="display: none;">
         <img src="img/j.png" id="jugador" style="display: none;">
+        <img src="img/3.png" id="esquina" style="display: none;">
 
         <!-- Espai de dibuix -->
-        <div class="">
-
-            <div class="tauler"> <canvas id="espai" width="550" height="550"> </canvas></div>
+        <div class="container">
             <div class="left col-3">
-                <p>Temps: <span id="compte"></span></p>
+                <p>TEMPS: <span id="compte"></span></p>
                 <div id="puntuacio" width="300" height="100"></div>
             </div>
+            <div class="tauler"> <canvas id="espai" width="540" height="540"> </canvas></div>
+
 
         </div>
     </body>
@@ -75,86 +76,72 @@ and open the template in the editor.
         assignarDireccioInicial(fantasma1, 1);
         assignarDireccioInicial(fantasma2, 1);
         assignarDireccioInicial(fantasma3, 1);
-        segonsRefresc = 1 * 100; //variable per posar els segons que volem que es fasi 
-
-        primerMovimentJugador = true; //variable booleana global que emmagatzema si es la primera vegada en el joc que el jugador es mou
+        //variable per posar els segons que volem de refresc del tauler
+        segonsRefresc = 1 * 100;
+        //variable booleana global que emmagatzema si es la primera vegada en el joc que el jugador es mou
+        primerMovimentJugador = true;
+        //variable booleana que fa de trigger si ha perdut o no l'usuari.
         haPerdut = false;
-        puntuacio = 0;
-        listener = document.getElementById("all");
+        //on inicialitzem la puntuacio del joc
+        puntuacio();
+        //inicialitzem la variable listener que escoltara pel teclat amb l'eventListener 
+        var listener = document.getElementById("all");
         listener.addEventListener("keydown", notificaObservador);
 
-        /*moviment = setInterval(moviment, segonsRefresc); //fem que cada segon s'executi la funcio del moviment on estaran les funcions que volem que es fasin cada segon
-         window.setInterval(pinta, segonsRefresc);
-         compteEnrere();
-         */
+        //fem que cada segon s'executi la funcio del moviment on estaran les funcions que volem que es fasin cada x temps de refresc
+        moviment = setInterval(moviment, segonsRefresc);
+        //cada x temps pintem el tauler amb el canvas
+        window.setInterval(pinta, segonsRefresc);
+        //funcio que fa el compte enrere del temps que queda a la partida
+        compteEnrere();
+
+        function puntuacio() {
+            if (buscarCookie("haGuanyat") != '') { //si tenim la cookie de que ha guanyat la puntuacio sera aquest valor
+                puntuacio = parseInt(buscarCookie("haGuanyat"));
+            } else {
+                puntuacio = 0;//si no, es un 0
+            }
+        }
+
         function compteEnrere() {
+            //variable temps expresada en segons
             var tempsrestant = 5 * 60;
+            //cada segon s'executara aquesta funcio 
             var temps = setInterval(function () {
+                //resta 1 segon cada segon que pasa
                 tempsrestant--;
+                //suma 1 a la puntuacio cada segon que pasa
                 puntuacio += 1;
+                //variable per calcular minuts
                 var minuts = Math.floor(tempsrestant / 60);
+                //variable per calcular segons
                 var segons = Math.floor(tempsrestant - minuts * 60);
-                if (segons.toString().length < 1) {
-                    segons = +0;
+                //fem que si els segons son 1 numero (10< i >0) que afegeixi un 0 devant perque no es
+                if (segons.toString().length < 2) {
+                    segons = '0' + segons.toString();
                 }
+                //afegim el temps a l'html
                 document.getElementById("compte").textContent = minuts + ":" + segons;
                 if (tempsrestant <= 0) {
+                    //si el temps es 0 significa que ha guanyat
                     alert("Has guanyat\n\nPuntuació: " + puntuacio);
-                    if (typeof buscarCookie("maxPuntuacio") === 'undefined') {
+                    //si la cookie de la maxima puntuacio es mes petita que la puntuacio la creem amb la puntuacio
+                    if (buscarCookie("maxPuntuacio") <= puntuacio) {
                         afegirCookie("maxPuntuacio", puntuacio, 7);
-                    } else {
-                        if (buscarCookie("maxPuntuacio") < puntuacio) {
-                            afegirCookie("maxPuntuacio", puntuacio, 7);
-                        }
                     }
-                    puntuacio = 0;
+                    //
+                    afegirCookie("haGuanyat", puntuacio, 7);
+
                     location.reload();
                     clearInterval(temps);
                 }
             }, 1000);
         }
 
-        function pinta() {
-            var canvas = document.getElementById("espai");
-            var ctx = canvas.getContext("2d");
-            var img;
-            for (var i = 0; i < tauler.length; i++) {
-                for (var j = 0; j < tauler[i].length; j++) {
-                    if (tauler[j][i] === 1) { //pasadis
-                        img = document.getElementById("pasadis");
-                    } else if (tauler[j][i] === 0) {
-                        img = document.getElementById("paret");
-                    } else if (tauler[j][i] === 'F') {
-                        img = document.getElementById("fantasma");
-                    } else if (tauler[j][i] === 'J') {
-                        img = document.getElementById("jugador");
-                    }
-                    ctx.drawImage(img, i * 24, j * 24, 24, 24); //24 son els pixels de cada cuadradet (720px/30posicions = 24)
-                }
-            }
-        }
-
-        function notificaObservador(e) {
-            console.log("Event " + e.keyCode);
-            if (e.keyCode === 38) {//amunt
-                jugador["direccioUsuari"] = 3;
-                primerMovimentJugador = false;
-            } else if (e.keyCode === 40) {//abaix
-                jugador["direccioUsuari"] = 1;
-                primerMovimentJugador = false;
-            } else if (e.keyCode === 37) {//esquerra
-                jugador["direccioUsuari"] = 4;
-                primerMovimentJugador = false;
-            } else if (e.keyCode === 39) {//dreta
-                jugador["direccioUsuari"] = 2;
-                primerMovimentJugador = false;
-            }
-
-        }
-
         function comprovarDireccioValida() {
             //funcio que comprova si la direccio introduida per teclat es valida
             var direccio = jugador["direccioUsuari"];
+
             if (direccioDesitjadaEsParet(jugador) === false) { //si es valida
                 jugador["direccio"] = direccio;//la direccio en la que el jugador ha d'anar sera la del teclat
                 moureXY(jugador); //una vegada posada la direccio farem que es mogui el jugador
@@ -163,16 +150,19 @@ and open the template in the editor.
         }
 
         function moviment() {
-            if (haPerdut === false) {
+            if (haPerdut === false) { //si encara no ha perdut
                 //cridem al metode moureFantasmes el cual necesita un parametre jugador o fantasma
                 moureFantasmes(fantasma1);
                 moureFantasmes(fantasma2);
                 moureFantasmes(fantasma3);
                 //pel jugador utilitzarem un metode diferent
                 moureJugador();
-                document.getElementById("puntuacio").innerHTML = "Puntuació: " + puntuacio + "<br>Màxmia puntuació: " + maximaPuntuacio();
-            } else {
-                reiniciarJoc();
+                document.getElementById("puntuacio").innerHTML = "PUNTUACIÓ: " + puntuacio + "<br>MÀXIMA PUNTUACIÓ: " + maximaPuntuacio();
+            } else {//si ha perdut
+                reiniciarJoc(); //reiniciem joc
+                //aixo abans estaba fet que tan aviat es choquesin que el joc es pares
+                //pero al navegador sortia com que habia perdut/guanyat sense veure que els personatjes s'aguesin xocat
+                //aixi que vaig pensar aquesta solucio
             }
         }
         function maximaPuntuacio() {
@@ -186,14 +176,13 @@ and open the template in the editor.
 
             if (jugador["direccioUsuari"] !== 0) { //si l'usuari ha pulsat algun boto
                 if (direccioDesitjadaEsParet(jugador) === false) { //si la direccio que ha pulsat l'usuari no es paret
-                    comprovarDireccioValida();//posali la direccio a fantassma/jugador['direccio'] i fa el moviment
-                } else if (direccioSeguentEsParet(jugador) === false || primerMovimentJugador === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruilla o la seguent posicio no es paret
+                    comprovarDireccioValida();//posa la direccio a fantassma/jugador['direccio'] i fa el moviment
+                } else if (direccioSeguentEsParet(jugador) === false || primerMovimentJugador === true) { //aqui nomes vindra un cop
                     moureXY(jugador);
                     primerMovimentJugador = false;
-                } else { //si es paret o es cruilla li asignara una nova direccio i fara el moviment
-                    comprovarDireccioValida();
-                }
+                } 
             } else {
+                //si es el primer cop que s'executa el joc asignem una direccio per primera vegada i fem que s'experi a una paret fins que l'ususari premi qualsevol tecla valida
                 assignarDireccioInicial(jugador, 1);
                 jugador["direccioUsuari"] = jugador["direccio"];
                 moureXY(jugador);
@@ -203,8 +192,8 @@ and open the template in the editor.
         }
 
         function moureFantasmes(variable) {
-
-            if (esCruilla(variable) === true || direccioSeguentEsParet(variable) === true) { //aquest metode mou els fantasmes/jugador si no esta en una cruilla o la seguent posicio no es paret
+            //aquest metode mou els fantasmes/jugador si no esta en una cruilla o la seguent posicio no es paret
+            if (esCruilla(variable) === true || direccioSeguentEsParet(variable) === true) { 
                 assignarDireccioInicial(variable, 0);
                 moureXY(variable);
             } else {
@@ -215,13 +204,14 @@ and open the template in the editor.
         function reiniciarJoc() {
             alert('Has perdut\nPuntuació: ' + puntuacio);//printem que hem perdut
 
-            if (typeof buscarCookie("maxPuntuacio") === 'undefined') {
+            if (typeof buscarCookie("maxPuntuacio") === 'undefined') {//si no esta feta la cookie la fem
                 afegirCookie("maxPuntuacio", puntuacio, 7);
             } else {
-                if (buscarCookie("maxPuntuacio") < puntuacio) {
-                    afegirCookie("maxPuntuacio", puntuacio, 7);
+                if (buscarCookie("maxPuntuacio") < puntuacio) {//si esta feta i la puntuacio de la partida es major a la de la cookie
+                    afegirCookie("maxPuntuacio", puntuacio, 7);//li afegim el nou valor de la puntuacio
                 }
             }
+            afegirCookie('haGuanyat', 0, 7); //quan perdem la cookie hem guanyat val 0
             puntuacio = 0;
             location.reload(); //refresquem la pagina
         }
@@ -274,7 +264,7 @@ and open the template in the editor.
             }
         }
 
-        function fantasmesSonAprop(variable) { //metode que ens diu si ni han fantasmes a prop (falta millorar)
+        function fantasmesSonAprop(variable) { //metode que ens diu si ni han fantasmes a prop de la nostra creu, en 6 caselles
             var hiHaFantasma = false;
             try {
                 for (var i = 1; i <= 6; i++) {
@@ -330,6 +320,7 @@ and open the template in the editor.
         }
 
         function esSurtDelTauler(variable) {
+            //metode que ens diu si es surt del tauler
             var posicions = 6;
             if (variable["x"] + posicions >= 29) {
                 return true;
@@ -534,6 +525,7 @@ and open the template in the editor.
         }
 
         function esCruilla(variable) {
+            //ens diu si estem a una cruilla o no
             var amunt = 0;
             var abaix = 0;
             var esquerra = 0;
@@ -574,6 +566,8 @@ and open the template in the editor.
         function generarNumeroAleatori(min, max) { //genera un numero aleatori
             return Math.round(Math.random() * ((max) - min) + min);
         }
+        
+        /*ref: https://stackoverflow.com/questions/14573223/set-cookie-and-get-cookie-with-javascript*/
 
         function afegirCookie(name, value, days) {
             var expires = "";
@@ -596,6 +590,45 @@ and open the template in the editor.
                     return c.substring(nameEQ.length, c.length);
             }
             return null;
+        }
+        /*--------------------------------------------------------------------------*/
+        
+        function pinta() {
+            var canvas = document.getElementById("espai");
+            var ctx = canvas.getContext("2d");
+            var img;
+            for (var i = 0; i < tauler.length; i++) {
+                for (var j = 0; j < tauler[i].length; j++) {
+                    if (tauler[j][i] === 1) { //pasadis
+                        img = document.getElementById("pasadis");
+                    } else if (tauler[j][i] === 0) {
+                        img = document.getElementById("paret");
+                    } else if (tauler[j][i] === 'F') {
+                        img = document.getElementById("fantasma");
+                    } else if (tauler[j][i] === 'J') {
+                        img = document.getElementById("jugador");
+                    }
+                    ctx.drawImage(img, i * 18, j * 18, 18, 18); //24 son els pixels de cada cuadradet (540px/30posicions = 24)
+                }
+            }
+        }
+
+        function notificaObservador(e) {
+            console.log("Event " + e.keyCode);
+            if (e.keyCode === 38) {//amunt
+                jugador["direccioUsuari"] = 3;
+                primerMovimentJugador = false;
+            } else if (e.keyCode === 40) {//abaix
+                jugador["direccioUsuari"] = 1;
+                primerMovimentJugador = false;
+            } else if (e.keyCode === 37) {//esquerra
+                jugador["direccioUsuari"] = 4;
+                primerMovimentJugador = false;
+            } else if (e.keyCode === 39) {//dreta
+                jugador["direccioUsuari"] = 2;
+                primerMovimentJugador = false;
+            }
+
         }
 
     </script>
